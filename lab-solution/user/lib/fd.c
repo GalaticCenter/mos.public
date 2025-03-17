@@ -144,10 +144,10 @@ int dup(int oldfdnum, int newfdnum) {
 	ova = fd2data(oldfd);
 	nva = fd2data(newfd);
 	/* Step 5: Dunplicate the data and 'fd' self from old to new. */
-	if ((r = syscall_mem_map(0, oldfd, 0, newfd, vpt[VPN(oldfd)] & (PTE_D | PTE_LIBRARY))) <
+	/* if ((r = syscall_mem_map(0, oldfd, 0, newfd, vpt[VPN(oldfd)] & (PTE_D | PTE_LIBRARY))) <
 	    0) {
 		goto err;
-	}
+	} */
 
 	if (vpd[PDX(ova)]) {
 		for (i = 0; i < PDMAP; i += PTMAP) {
@@ -163,6 +163,10 @@ int dup(int oldfdnum, int newfdnum) {
 		}
 	}
 
+	if ((r = syscall_mem_map(0, oldfd, 0, newfd, vpt[VPN(oldfd)] & (PTE_D | PTE_LIBRARY))) <
+	    0) {
+		goto err;
+	}
 	return newfdnum;
 
 err:
@@ -191,7 +195,6 @@ int read(int fdnum, void *buf, u_int n) {
 	struct Dev *dev;
 	struct Fd *fd;
 	/* Exercise 5.10: Your code here. (1/4) */
-
 	if ((r = fd_lookup(fdnum, &fd)) < 0) {
 		return r;
 	}
@@ -203,7 +206,6 @@ int read(int fdnum, void *buf, u_int n) {
 	// Step 2: Check the open mode in 'fd'.
 	// Return -E_INVAL if the file is opened for writing only (O_WRONLY).
 	/* Exercise 5.10: Your code here. (2/4) */
-
 	if ((fd->fd_omode & O_ACCMODE) == O_WRONLY) {
 		return -E_INVAL;
 	}

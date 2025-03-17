@@ -11,6 +11,16 @@ ENTRY(_start)
 SECTIONS {
 	/* Exercise 3.10: Your code here. */
 
+	. = 0x80000000;
+	.tlb_miss_entry : {
+		*(.text.tlb_miss_entry)
+	}
+
+	. = 0x80000180;
+	.exc_gen_entry : {
+		*(.text.exc_gen_entry)
+	}
+
 	/* fill in the correct address of the key sections: text, data, bss. */
 	/* Hint: The loading address can be found in the memory layout. And the data section
 	 *       and bss section are right after the text section, so you can just define
@@ -18,7 +28,6 @@ SECTIONS {
 	 */
 	/* Step 1: Set the loading address of the text section to the location counter ".". */
 	/* Exercise 1.2: Your code here. (1/4) */
-
 	. = 0x80020000;
 
 	/* Step 2: Define the text section. */

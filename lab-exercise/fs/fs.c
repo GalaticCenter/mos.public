@@ -731,17 +731,17 @@ int file_set_size(struct File *f, u_int newsize) {
 void file_flush(struct File *f) {
 	u_int nblocks;
 	u_int bno;
-	u_int diskno;
+	u_int diskbno;
 	int r;
 
 	nblocks = ROUND(f->f_size, BLOCK_SIZE) / BLOCK_SIZE;
 
 	for (bno = 0; bno < nblocks; bno++) {
-		if ((r = file_map_block(f, bno, &diskno, 0)) < 0) {
+		if ((r = file_map_block(f, bno, &diskbno, 0)) < 0) {
 			continue;
 		}
-		if (block_is_dirty(diskno)) {
-			write_block(diskno);
+		if (block_is_dirty(diskbno)) {
+			write_block(diskbno);
 		}
 	}
 }
@@ -763,6 +763,23 @@ void file_close(struct File *f) {
 	// Flush the file itself, if f's f_dir is set, flush it's f_dir.
 	file_flush(f);
 	if (f->f_dir) {
+		u_int nblock = f->f_dir->f_size / BLOCK_SIZE;
+		for (int i = 0; i < nblock; i++) {
+			u_int diskbno;
+			struct File *files;
+			if (file_map_block(f->f_dir, i, &diskbno, 0) < 0) {
+				debugf("file_close: file_map_block failed\n");
+				break;
+			}
+			if (read_block(diskbno, (void **)&files, 0) < 0) {
+				debugf("file_close: read_block failed\n");
+				break;
+			}
+			if (files <= f && f < files + FILE2BLK) {
+				dirty_block(diskbno);
+				break;
+			}
+		}
 		file_flush(f->f_dir);
 	}
 }

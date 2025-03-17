@@ -270,6 +270,11 @@ int sys_set_env_status(u_int envid, u_int status) {
 
 	/* Step 4: Set the 'env_status' of 'env'. */
 	env->env_status = status;
+
+	/* Step 5: Use 'schedule' with 'yield' set if ths 'env' is 'curenv'. */
+	if (env == curenv) {
+		schedule(1);
+	}
 	return 0;
 }
 

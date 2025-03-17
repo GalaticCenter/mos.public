@@ -114,6 +114,11 @@ int envid2env(u_int envid, struct Env **penv, int checkperm) {
 	 *   You may want to use 'ENVX'.
 	 */
 	/* Exercise 4.3: Your code here. (1/2) */
+	if (envid == 0) {
+		*penv = curenv;
+		return 0;
+	}
+	e = &envs[ENVX(envid)];
 
 	if (e->env_status == ENV_FREE || e->env_id != envid) {
 		return -E_BAD_ENV;
@@ -126,6 +131,9 @@ int envid2env(u_int envid, struct Env **penv, int checkperm) {
 	 *   If violated, return '-E_BAD_ENV'.
 	 */
 	/* Exercise 4.3: Your code here. (2/2) */
+	if (checkperm && e != curenv && e->env_parent_id != curenv->env_id) {
+		return -E_BAD_ENV;
+	}
 
 	/* Step 3: Assign 'e' to '*penv'. */
 	*penv = e;
@@ -192,6 +200,7 @@ static int env_setup_vm(struct Env *e) {
 	struct Page *p;
 	try(page_alloc(&p));
 	/* Exercise 3.3: Your code here. */
+
 	p->pp_ref++;
 	e->env_pgdir = (Pde *)page2kva(p);
 
@@ -275,6 +284,7 @@ int env_alloc(struct Env **new, u_int parent_id) {
 
 	/* Step 5: Remove the new Env from env_free_list. */
 	/* Exercise 3.4: Your code here. (4/4) */
+
 	LIST_REMOVE(e, env_link);
 
 	*new = e;
@@ -306,6 +316,7 @@ static int load_icode_mapper(void *data, u_long va, size_t offset, u_int perm, c
 
 	/* Step 1: Allocate a page with 'page_alloc'. */
 	/* Exercise 3.5: Your code here. (1/2) */
+
 	if ((r = page_alloc(&p)) != 0) {
 		return r;
 	}
@@ -351,6 +362,7 @@ static void load_icode(struct Env *e, const void *binary, size_t size) {
 
 	/* Step 3: Set 'e->env_tf.cp0_epc' to 'ehdr->e_entry'. */
 	/* Exercise 3.6: Your code here. */
+
 	e->env_tf.cp0_epc = ehdr->e_entry;
 }
 
@@ -376,6 +388,7 @@ struct Env *env_create(const void *binary, size_t size, int priority) {
 	/* Step 3: Use 'load_icode' to load the image from 'binary', and insert 'e' into
 	 * 'env_sched_list' using 'TAILQ_INSERT_HEAD'. */
 	/* Exercise 3.7: Your code here. (3/3) */
+
 	load_icode(e, binary, size);
 	TAILQ_INSERT_HEAD(&env_sched_list, e, env_sched_link);
 
@@ -493,7 +506,6 @@ void env_run(struct Env *e) {
 	 *    returning to the kernel caller, making 'env_run' a 'noreturn' function as well.
 	 */
 	/* Exercise 3.8: Your code here. (2/2) */
-
 	env_pop_tf(&curenv->env_tf, curenv->env_asid);
 }
 
