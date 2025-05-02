@@ -18,7 +18,9 @@
 
 实验需在 Linux 系统上进行，依赖的软件主要包括：
 - host 工具链：git、gcc、gdb、make、python3
-- mips 工具链与硬件模拟器：mips-linux-gnu-gcc、mips-linux-gnu-gdb 或 gdb-multiarch、qemu-system-mipsel
+- 工具链与硬件模拟器：
+  - MIPS 32 实验（位于 `lab-{exercise,solution}/mips32` 下）：mips-linux-gnu-gcc、mips-linux-gnu-gdb 或 gdb-multiarch、qemu-system-mipsel
+  - LoongArch 32 Reduced 实验（位于 `lab-{exercise,solution}/la32r` 下）：loongarch32r-linux-gnusf-gcc、loongarch32r-linux-gnusf-gdb、qemu-system-loongarch32
 
 ### 测试验证
 
